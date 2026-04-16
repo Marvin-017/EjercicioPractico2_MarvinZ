@@ -13,7 +13,11 @@
                 <i class="bi bi-ticket-detailed text-primary me-2"></i>Catálogo de Eventos
             </h2>
             <button sec:authorize="hasAnyRole('ADMIN', 'ORGANIZADOR')" 
-                    class="btn btn-success shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalEvento">
+                    type="button"
+                    id="btnNuevoEvento"
+                    class="btn btn-success shadow-sm rounded-pill px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalEvento">
                 <i class="bi bi-plus-circle me-1"></i> Nuevo Evento
             </button>
         </div>
@@ -44,51 +48,69 @@
                             </div>
                         </div>
                     </div>
+
                     <div sec:authorize="hasAnyRole('ADMIN', 'ORGANIZADOR')" class="card-footer bg-white border-top-0 pb-3 pt-0 text-center">
-                        <a th:href="@{/eventos/eliminar/{id}(id=${e.id})}" class="btn btn-outline-danger btn-sm rounded-pill w-100">
-                            <i class="bi bi-trash3 me-1"></i> Eliminar Evento
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/eventos/editar/{id}(id=${e.id})}" class="btn btn-outline-primary btn-sm rounded-pill w-100">
+                                <i class="bi bi-pencil-square me-1"></i> Editar Evento
+                            </a>
+                            <a th:href="@{/eventos/eliminar/{id}(id=${e.id})}" class="btn btn-outline-danger btn-sm rounded-pill w-100">
+                                <i class="bi bi-trash3 me-1"></i> Eliminar Evento
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div sec:authorize="hasAnyRole('ADMIN', 'ORGANIZADOR')" class="modal fade" id="modalEvento" tabindex="-1">
+    <div sec:authorize="hasAnyRole('ADMIN', 'ORGANIZADOR')" class="modal fade" id="modalEvento" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">
-                <form th:action="@{/eventos/guardar}" th:object="${eventoNuevo}" method="post">
+                <form th:action="@{/eventos/guardar}" th:object="${eventoNuevo}" method="post" id="formEvento">
+                    <input type="hidden" th:field="*{id}" id="eventoId">
+
                     <div class="modal-header bg-success text-white border-0 rounded-top-4">
-                        <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus me-2"></i> Registrar Nuevo Evento</h5>
+                        <h5 class="modal-title fw-bold" id="tituloModalEvento">
+                            <i class="bi bi-calendar-plus me-2"></i>
+                            <span th:text="${eventoNuevo.id != null ? 'Editar Evento' : 'Registrar Nuevo Evento'}"></span>
+                        </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
+
                     <div class="modal-body p-4">
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold">Nombre del Evento</label>
-                            <input type="text" th:field="*{nombre}" class="form-control bg-light border-0" required>
+                            <input type="text" th:field="*{nombre}" class="form-control bg-light border-0" required id="campoNombre">
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold">Descripción</label>
-                            <textarea th:field="*{descripcion}" class="form-control bg-light border-0" rows="3" required></textarea>
+                            <textarea th:field="*{descripcion}" class="form-control bg-light border-0" rows="3" required id="campoDescripcion"></textarea>
                         </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted fw-bold">Fecha</label>
-                                <input type="date" th:field="*{fecha}" class="form-control bg-light border-0" required>
+                                <input type="date" th:field="*{fecha}" class="form-control bg-light border-0" required id="campoFecha">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted fw-bold">Capacidad</label>
-                                <input type="number" th:field="*{capacidad}" class="form-control bg-light border-0" required>
+                                <input type="number" th:field="*{capacidad}" class="form-control bg-light border-0" required id="campoCapacidad">
                             </div>
                         </div>
+
                         <div class="form-check form-switch mt-2">
-                            <input class="form-check-input" type="checkbox" role="switch" th:field="*{activo}" checked>
+                            <input class="form-check-input" type="checkbox" role="switch" th:field="*{activo}" id="campoActivo">
                             <label class="form-check-label text-muted fw-bold">Mantener evento activo</label>
                         </div>
                     </div>
+
                     <div class="modal-footer border-0 bg-light rounded-bottom-4">
                         <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">Guardar Evento</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">
+                            <span th:text="${eventoNuevo.id != null ? 'Actualizar Evento' : 'Guardar Evento'}"></span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -96,6 +118,36 @@
     </div>
 
     <footer th:replace="~{plantilla :: footer}"></footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modalElemento = document.getElementById("modalEvento");
+            const modal = new bootstrap.Modal(modalElemento);
+
+            const inputId = document.getElementById("eventoId");
+            const inputNombre = document.getElementById("campoNombre");
+            const inputDescripcion = document.getElementById("campoDescripcion");
+            const inputFecha = document.getElementById("campoFecha");
+            const inputCapacidad = document.getElementById("campoCapacidad");
+            const inputActivo = document.getElementById("campoActivo");
+            const btnNuevo = document.getElementById("btnNuevoEvento");
+
+            if (inputId && inputId.value && inputId.value.trim() !== "") {
+                modal.show();
+            }
+
+            if (btnNuevo) {
+                btnNuevo.addEventListener("click", function () {
+                    if (inputId) inputId.value = "";
+                    if (inputNombre) inputNombre.value = "";
+                    if (inputDescripcion) inputDescripcion.value = "";
+                    if (inputFecha) inputFecha.value = "";
+                    if (inputCapacidad) inputCapacidad.value = "";
+                    if (inputActivo) inputActivo.checked = true;
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>
