@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/usuarios")
@@ -20,39 +21,35 @@ public class UsuarioController {
 
     @GetMapping
     public String listar(Model model, @RequestParam(required = false) String rolNombre) {
-        // Si el parámetro rolNombre trae algo, filtramos. Si no, listamos todos.
         if (rolNombre != null && !rolNombre.isEmpty()) {
             model.addAttribute("usuarios", usuarioService.buscarPorRol(rolNombre));
-            model.addAttribute("filtroAplicado", rolNombre); // Para saber qué estamos filtrando
+            model.addAttribute("filtroAplicado", rolNombre);
         } else {
             model.addAttribute("usuarios", usuarioService.listarUsuarios());
         }
-        
-        model.addAttribute("roles", rolService.listarRoles()); 
+
+        model.addAttribute("roles", rolService.listarRoles());
         model.addAttribute("usuarioNuevo", new Usuario());
-        return "usuarios"; 
+        return "usuarios";
     }
 
     @PostMapping("/guardar")
     public String guardar(Usuario usuario) {
-        // Determinamos si es nuevo verificando si tiene un ID asignado
         boolean esNuevo = (usuario.getId() == null || usuario.getId() == 0);
-        usuarioService.guardar(usuario, esNuevo); // El servicio enviará el correo si es nuevo
+        usuarioService.guardar(usuario, esNuevo);
         return "redirect:/usuarios";
     }
 
     @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public String eliminar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         usuarioService.eliminar(id);
+        redirectAttributes.addFlashAttribute("mensaje", "No se puede eliminar el usuario. Fue desactivado correctamente.");
         return "redirect:/usuarios";
     }
 
-    // --- NUEVO MÉTODO PARA LA EDICIÓN ---
-    // Usamos @ResponseBody para que devuelva el objeto Usuario en formato JSON
     @GetMapping("/editar/{id}")
     @ResponseBody
     public Usuario editar(@PathVariable Long id) {
         return usuarioService.buscarPorId(id);
     }
-    
 }

@@ -24,7 +24,6 @@ public class UsuarioService {
     public Usuario guardar(Usuario usuario, boolean esNuevo) {
         Usuario guardado = usuarioRepository.save(usuario);
         
-        // Si el usuario es nuevo, enviamos el correo (Requisito A)
         if (esNuevo) {
             enviarCorreoBienvenida(guardado.getEmail(), guardado.getNombre());
         }
@@ -36,14 +35,17 @@ public class UsuarioService {
     }
     
     public void eliminar(Long id) { 
-        usuarioRepository.deleteById(id); 
+        Usuario usuario = usuarioRepository.findById(id).orElse(null);
+        if (usuario != null) {
+            usuario.setActivo(false);
+            usuarioRepository.save(usuario);
+        }
     }
 
     public List<Usuario> buscarPorRol(String nombreRol) { 
         return usuarioRepository.findByRolNombre(nombreRol); 
     }
 
-    // Lógica para enviar el correo
     private void enviarCorreoBienvenida(String emailDestino, String nombre) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
