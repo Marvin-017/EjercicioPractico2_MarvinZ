@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{plantilla :: head}"></head>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <nav th:replace="~{plantilla :: navbar}"></nav>
+
+    <div class="container mt-5 flex-grow-1">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark">
+                <i class="bi bi-ticket-detailed text-primary me-2"></i>Catálogo de Eventos
+            </h2>
+            <button sec:authorize="hasAnyRole('ADMIN', 'ORGANIZADOR')" 
+                    class="btn btn-success shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalEvento">
+                <i class="bi bi-plus-circle me-1"></i> Nuevo Evento
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" th:each="e : ${eventos}">
+                <div class="card card-efecto h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h5 class="card-title mb-0 fw-bold" th:text="${e.nombre}"></h5>
+                    </div>
+                    <div class="card-body bg-white">
+                        <p class="card-text text-secondary mb-4" th:text="${e.descripcion}"></p>
+                        
+                        <div class="d-flex flex-column gap-2 mb-4">
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="bi bi-calendar-event text-primary me-2 fs-5"></i>
+                                <span th:text="${e.fecha}"></span>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="bi bi-people-fill text-info me-2 fs-5"></i>
+                                <span><strong th:text="${e.capacidad}"></strong> lugares disponibles</span>
+                            </div>
+                            <div class="d-flex align-items-center mt-2">
+                                <span th:class="${e.activo ? 'badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill' : 'badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 rounded-pill'}">
+                                    <i th:class="${e.activo ? 'bi bi-check-circle-fill me-1' : 'bi bi-x-circle-fill me-1'}"></i>
+                                    <span th:text="${e.activo ? 'Evento Activo' : 'Inactivo'}"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div sec:authorize="hasAnyRole('ADMIN', 'ORGANIZADOR')" class="card-footer bg-white border-top-0 pb-3 pt-0 text-center">
+                        <a th:href="@{/eventos/eliminar/{id}(id=${e.id})}" class="btn btn-outline-danger btn-sm rounded-pill w-100">
+                            <i class="bi bi-trash3 me-1"></i> Eliminar Evento
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div sec:authorize="hasAnyRole('ADMIN', 'ORGANIZADOR')" class="modal fade" id="modalEvento" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <form th:action="@{/eventos/guardar}" th:object="${eventoNuevo}" method="post">
+                    <div class="modal-header bg-success text-white border-0 rounded-top-4">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus me-2"></i> Registrar Nuevo Evento</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-bold">Nombre del Evento</label>
+                            <input type="text" th:field="*{nombre}" class="form-control bg-light border-0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-bold">Descripción</label>
+                            <textarea th:field="*{descripcion}" class="form-control bg-light border-0" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted fw-bold">Fecha</label>
+                                <input type="date" th:field="*{fecha}" class="form-control bg-light border-0" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted fw-bold">Capacidad</label>
+                                <input type="number" th:field="*{capacidad}" class="form-control bg-light border-0" required>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" role="switch" th:field="*{activo}" checked>
+                            <label class="form-check-label text-muted fw-bold">Mantener evento activo</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light rounded-bottom-4">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">Guardar Evento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{plantilla :: footer}"></footer>
+
+</body>
+</html>

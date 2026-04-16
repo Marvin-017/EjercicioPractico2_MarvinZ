@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{plantilla :: head}"></head>
+
+<body>
+    <nav th:replace="~{plantilla :: navbar}"></nav>
+
+    <main class="contenido-principal">
+        <div class="container mt-5">
+            
+            <div class="mb-4">
+                <h2 class="fw-bold text-dark">
+                    <i class="bi bi-shield-lock text-primary me-2"></i>Gestión de Seguridad: Roles
+                </h2>
+                <p class="text-muted">Administre los niveles de acceso para los usuarios del sistema.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="tarjeta-premium overflow-hidden">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="py-3 px-4 text-secondary small text-uppercase">ID</th>
+                                        <th class="py-3 text-secondary small text-uppercase">Nombre del Rol</th>
+                                        <th class="py-3 text-center text-secondary small text-uppercase">Estado de Acceso</th>
+                                        <th class="py-3 text-center text-secondary small text-uppercase">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="r : ${roles}">
+                                        <td class="px-4 text-muted fw-bold" th:text="${r.id}"></td>
+                                        <td>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold" th:text="${r.nombre}"></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span th:if="${r.nombre == 'ADMIN' or r.nombre == 'ORGANIZADOR' or r.nombre == 'CLIENTE'}" 
+                                                  class="text-success small">
+                                                <i class="bi bi-patch-check-fill me-1"></i> Sistema
+                                            </span>
+                                            <span th:unless="${r.nombre == 'ADMIN' or r.nombre == 'ORGANIZADOR' or r.nombre == 'CLIENTE'}" 
+                                                  class="text-muted small">Personalizado</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:if="${r.nombre != 'ADMIN' and r.nombre != 'ORGANIZADOR' and r.nombre != 'CLIENTE'}" 
+                                               th:href="@{/roles/eliminar/{id}(id=${r.id})}" 
+                                               class="btn btn-outline-danger btn-sm rounded-circle shadow-sm" title="Eliminar Rol">
+                                                <i class="bi bi-trash3-fill"></i>
+                                            </a>
+                                            <span th:if="${r.nombre == 'ADMIN' or r.nombre == 'ORGANIZADOR' or r.nombre == 'CLIENTE'}" 
+                                                  class="badge bg-light text-muted border rounded-pill">
+                                                <i class="bi bi-lock-fill me-1"></i> Protegido
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="tarjeta-premium p-4 shadow-sm border-0">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                                <i class="bi bi-plus-lg text-primary fs-4"></i>
+                            </div>
+                            <h5 class="fw-bold mb-0">Nuevo Rol</h5>
+                        </div>
+                        <p class="text-muted small mb-4">Ingrese el nombre del nuevo rol de usuario para el sistema.</p>
+                        
+                        <form th:action="@{/roles/guardar}" th:object="${rolNuevo}" method="post">
+                            <div class="mb-4">
+                                <label class="form-label text-muted fw-bold small text-uppercase">Nombre del Rol</label>
+                                <input type="text" th:field="*{nombre}" class="form-control border-0 bg-light py-2" 
+                                       placeholder="Ej: SUPERVISOR" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-redondeado w-100 py-2 shadow-sm">
+                                <i class="bi bi-save2 me-2"></i>Guardar Rol
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{plantilla :: footer}"></footer>
+</body>
+</html>
